@@ -94,13 +94,6 @@ app.get('/api/youtubers', async (req, res) => {
   }
 })
 
-// app.get('/api/items/youtuber/:youtuber', async (req, res) =>{
-//   await Items.find({youtuber: req.params.youtuber}, function(err, youtuber){
-//       if(err) return res.status(500).json({error: err});
-//       if(youtuber.length === 0) return res.status(404).json({error: 'book not found'});
-//       res.json(youtuber);
-//   })
-// });
 app.get('/api/items/youtuber/:youtuber', async (req, res) => {
   try{
     const items = await Items.find( {youtuber: req.params.youtuber});
@@ -155,8 +148,25 @@ app.post('/api/items/create', (req, res) => {
     })
   })
 })
+app.put('/api/items/:item_id', (req, res) => {
+  const items = new Items(req.body)
+  items.update({_id: req.params.item_id}, { $set: req.body })
+  try{
+    res.json({message: complete});
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+})
 
-
+app.delete('/api/items/:item_id', (req, res) => {
+  const items = new Items(req.body)
+  items.remove({_id: req.params.item_id})
+  try{
+    res.json({message: "complete"});
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+})
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
