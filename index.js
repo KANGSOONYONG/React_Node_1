@@ -21,6 +21,7 @@ app.use(cookieParser());
 
 const mongoose = require('mongoose')
 
+
 mongoose.connect(config.mongoURI,)
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err))
@@ -122,11 +123,8 @@ app.get('/api/sitenames', async (req, res) => {
 
 app.post('/api/youtubers/create', (req, res) => {
 
-  // 회원 가입 할 때 필요한 정보들을 client에서 가져오면
-  // 그것들을 데이터 베이스에 넣어준다.
   const youtubers = new Youtubers(req.body)
 
-  // MongoDB에서 온 메소드
   youtubers.save((err, youInfo) => {
     if(err) return res.json({ success : false, err})
     return res.status(200).json({
@@ -134,13 +132,10 @@ app.post('/api/youtubers/create', (req, res) => {
     })
   })
 })
-app.post('/api/items/create', (req, res) => {
 
-  // 회원 가입 할 때 필요한 정보들을 client에서 가져오면
-  // 그것들을 데이터 베이스에 넣어준다.
+app.post('/api/items/create', (req, res) => {
   const items = new Items(req.body)
 
-  // MongoDB에서 온 메소드
   items.save((err, itemInfo) => {
     if(err) return res.json({ success : false, err})
     return res.status(200).json({
@@ -148,29 +143,31 @@ app.post('/api/items/create', (req, res) => {
     })
   })
 })
-app.put('/api/items/:item_id', (req, res) => {
-  const items = new Items(req.body)
-  items.update({_id: req.params.item_id}, { $set: req.body })
-  try{
-    res.json({message: complete});
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-})
 
-app.delete('/api/items/:item_id', (req, res) => {
+app.put('/api/items/put/:item_id', (req, res) => {
   const items = new Items(req.body)
-  items.remove({_id: req.params.item_id})
+  items.findOneAndUpdate({_id: req.params.ObjectId("item_id")}, {$set: {code: req.body}})
   try{
     res.json({message: "complete"});
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 })
+const { ObjectId } = require('mongodb');
+
+app.delete('/api/items/:items_id', async (req, res) => {
+  var id = req.params.items_id;
+  await Items.deleteOne({ _id : ObjectId(`${id}`)})
+  .then(result => res.json(`${result.deletedCount}개의 항목 삭제완료`))
+  .catch(err => res.json(err)); 
+})
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
+
 app.use(express.json());
 var cors = require('cors');
 app.use(cors({
