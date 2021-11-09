@@ -143,17 +143,15 @@ app.post('/api/items/create', (req, res) => {
     })
   })
 })
-
-app.put('/api/items/put/:item_id', (req, res) => {
-  const items = new Items(req.body)
-  items.findOneAndUpdate({_id: req.params.ObjectId("item_id")}, {$set: {code: req.body}})
-  try{
-    res.json({message: "complete"});
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-})
 const { ObjectId } = require('mongodb');
+
+app.put('/api/items/:items_id', async (req, res) => {
+  var id = req.params.items_id;
+  await Items.updateOne( {_id : ObjectId(`${id}`) }, {$set: req.body})
+  .then(result => res.json('수정완료'))
+  .catch(err => res.json(err)); 
+})
+
 
 app.delete('/api/items/:items_id', async (req, res) => {
   var id = req.params.items_id;
