@@ -33,9 +33,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/react-project/build/index.html'));
 });
 
-// app.get('*', function (req, res) {
-//   res.sendFile(path.join(__dirname, '/react-project/build/index.html'));
-// });
 // 회원가입 post 메소드
 app.post('/api/users/register', (req, res) => {
 
@@ -52,6 +49,36 @@ app.post('/api/users/register', (req, res) => {
   })
 })
 
+app.post('/api/users/login', (req, res) => {
+
+  // 요청된 이메일을 데이터베이스에서 있는지 찾는다.
+  User.findOne({ email: req.body.email }, (err, user) => {
+    if(!user) {
+      return res.json({
+        loginSuccess: false,
+        message: "제공된 이메일에 해당하는 유저가 없습니다."
+      })
+    }
+
+  // 요청된 이메일이 데이터 베이스에 있다면, 비밀번호가 맞는 비밀번호인지 확인
+  user.comparePassword(req.body.password , ( err, isMatch ) => {
+    if(!isMatch)
+      return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다."})
+    
+
+    // 비밀번호까지 맞다면 토큰을 생성하기
+    user.generateToken((err, user) => {
+      if(err) return res.status(400).send(err);
+
+      // 토큰을 저장한다. 어디에? -> 쿠키, 로컬스토리지 / 여기서는 쿠키
+      // 쿠키에 토큰을 저장하기 위해서는 cookie-parser를 다운 받아야 한다.
+      res.cookie("x_auth", user.token)
+      .status(200)
+      .json({ loginSuccess: true, userId: user._id, userToken: user.token})
+    })
+    })
+  })
+})
 app.get('/api/users/auth', auth , (req, res) => {
   // 여기까지 미들웨어를 통과해 왔다는 이야기는 Authentication 이 true라는 말
   res.status(200).json({
