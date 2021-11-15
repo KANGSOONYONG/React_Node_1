@@ -27,11 +27,16 @@ mongoose.connect(config.mongoURI,)
     .catch(err => console.log(err))
 
 // npm run build 된 것이 localhost 8080 메인에 뜨게 설정
-app.use(express.static(path.join(__dirname, 'react-project/build')));
+app.use(express.static(path.join(__dirname, 'react_project/build')));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '/react-project/build/index.html'));
+  res.sendFile(path.join(__dirname, '/react_project/build/index.html'));
 });
+
+// 라우팅 전권 넘기기
+// app.get('*', function (req, res) {
+//   res.sendFile(path.join(__dirname, '/react_project/build/index.html'));
+// });
 
 // 회원가입 post 메소드
 app.post('/api/users/register', (req, res) => {
@@ -49,6 +54,24 @@ app.post('/api/users/register', (req, res) => {
   })
 })
 
+// 회원가입 시 이메일 중복되었는지 확인
+app.post('/api/users/sameEmailCheck', (req, res) => {
+  // 요청된 이메일을 데이터베이스에서 있는지 찾는다.
+  User.findOne({ email: req.body.email }, (err, user) => {
+    if(!user) {
+      return res.json({
+        canUseEmail: true,
+        message: "사용 가능한 이메일 주소입니다."
+      })
+    } else  {
+      return res.json({
+        canUseEmail: false,
+        message: "이미 존재하는 이메일이 있습니다."
+      })
+    }
+  })
+})
+
 app.post('/api/users/login', (req, res) => {
 
   // 요청된 이메일을 데이터베이스에서 있는지 찾는다.
@@ -59,7 +82,6 @@ app.post('/api/users/login', (req, res) => {
         message: "제공된 이메일에 해당하는 유저가 없습니다."
       })
     }
-
   // 요청된 이메일이 데이터 베이스에 있다면, 비밀번호가 맞는 비밀번호인지 확인
   user.comparePassword(req.body.password , ( err, isMatch ) => {
     if(!isMatch)
