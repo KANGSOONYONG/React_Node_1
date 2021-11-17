@@ -33,10 +33,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/react_project/build/index.html'));
 });
 
-// 라우팅 전권 넘기기
-// app.get('*', function (req, res) {
-//   res.sendFile(path.join(__dirname, '/react_project/build/index.html'));
-// });
+
 
 // 회원가입 post 메소드
 app.post('/api/users/register', (req, res) => {
@@ -209,7 +206,10 @@ app.delete('/api/items/:items_id', async (req, res) => {
   .catch(err => res.json(err)); 
 })
 
-
+// // 라우팅 전권 넘기기
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, '/react_project/build/index.html'));
+});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
@@ -218,5 +218,5 @@ app.listen(port, () => {
 app.use(express.json());
 var cors = require('cors');
 app.use(cors({
-  origin: '*'
+  "Access-Control-Allow-Origin": "*"
 }));
